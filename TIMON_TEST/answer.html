@@ -128,6 +128,16 @@ const getNewZIndex = () => {
     return newZIndex;
 }
 
+// 
+const initEventBinding = (memoCnt) => {
+    // 닫기 이벤트
+    closeEvent();
+    // 입력 이벤트
+    textInputEvent();
+    // 드래그 이벤트
+    dragElement($(`#memo${memoCnt}`)["0"]);
+}
+
 // Text Input Event
 const textInputEvent = () => {
     // textarea 값을 입력시 그 값을 localStorae에 저장 및
@@ -284,12 +294,8 @@ $( document ).ready(() => {
 
             $(memo).appendTo(".wrap");
 
-            // 닫기 이벤트
-            closeEvent();
-            // 입력 이벤트
-            textInputEvent();
-            // 드래그 이벤트
-            dragElement($(`#memo${memoCnt}`)["0"]);
+            // memo 객체에 이벤트 바인딩
+            initEventBinding(memoCnt);
         }
     }
 });
@@ -344,12 +350,8 @@ document.addEventListener('contextmenu', () => {
     // localStorage 메모의 데이터 저장
     localStorage.setItem(memoCnt,JSON.stringify(memoData));
 
-    // 닫기 이벤트
-    closeEvent();
-    // 입력 이벤트
-    textInputEvent();
-    // 드래그 이벤트
-    dragElement($(`#memo${memoCnt}`)["0"]);
+    // memo 객체에 이벤트 바인딩
+    initEventBinding(memoCnt);
 });
 
 </script>
