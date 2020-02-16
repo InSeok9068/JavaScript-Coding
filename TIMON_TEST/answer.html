@@ -120,6 +120,8 @@ const closeEvent = () => {
 
 // Text Input Event
 const textInputEvent = () => {
+    // textarea 값을 입력시 그 값을 localStorae에 저장 및
+    // 해당 Div객체 localStorae의 z-index 최상위값 적용
     $('.textarea').keyup(function(){
         const zIndex = Number(localStorage.getItem("zIndex"))
         const newZIndex = zIndex+1
@@ -139,6 +141,7 @@ const textInputEvent = () => {
 
 // Storage Clear Event
 const storageClaeEvent = () => {
+    // Clear 버튼 클릭시 localStorage 클리어 및 페이지 리로드
     $('#btn_clear').click(function(){
         localStorage.clear();
         window.location.reload();
@@ -147,7 +150,7 @@ const storageClaeEvent = () => {
 
 const dragElement = (elmnt) => {
     // 위치값 변수 선언
-    let pos1 = 0, pos2 = 0, pos3 = 0, pos4 = 0;
+    let pos1 = 0, pos2 = 0, pos3 = 0, pos4 = 0, width = 0, height = 0;
 
     // 상단 드래그시 위치 조정
     const headerDragMouseDown = (e) => {
@@ -171,6 +174,10 @@ const dragElement = (elmnt) => {
         // 첫 마우스 커서 위치값 저장
         pos3 = e.clientX;
         pos4 = e.clientY;
+
+        // 첫 마우스 커서 시 해당 textarea의 값 저장
+        width  = Number(document.getElementById(elmnt.id + "textarea").style.width.replace('px', '')); 
+        height = Number(document.getElementById(elmnt.id + "textarea").style.height.replace('px', '')); 
 
         // 마우스 드래그 종료시 Event 설정
         document.onmouseup  = closeDragElement;
@@ -198,12 +205,15 @@ const dragElement = (elmnt) => {
         e.preventDefault();
 
         // 첫번째 클릭한 지점과 드래그 시점의 위치 값 계산하여 얼만큼 늘어난 수치를 계산
-        // textarea의 기본 width 200px와 height 100px에 계산값을 더하여줌
-        document.getElementById(elmnt.id + "textarea").style.width  = 200 + ((e.clientX - elmnt.offsetLeft) - (pos3 - elmnt.offsetLeft)) + "px";
-        document.getElementById(elmnt.id + "textarea").style.height = 100 + ((e.clientY - elmnt.offsetTop)  - (pos4 - elmnt.offsetTop)) + "px";
+        // textarea의 현재 width 와 height 값에 계산값을 더하여줌
+        document.getElementById(elmnt.id + "textarea").style.width  = width +  ((e.clientX - elmnt.offsetLeft) - (pos3 - elmnt.offsetLeft)) + "px";
+        document.getElementById(elmnt.id + "textarea").style.height = height + ((e.clientY - elmnt.offsetTop)  - (pos4 - elmnt.offsetTop)) + "px";
+
     }
 
     const closeDragElement = () => {
+        // 드랍 시점에서 top, left, width, height localStorae에 저장 및
+        // localStorae의 z-index 최상위값 적용
         const zIndex = Number(localStorage.getItem("zIndex"))
         const newZIndex = zIndex+1
 
