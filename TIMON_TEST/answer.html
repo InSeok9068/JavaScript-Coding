@@ -255,7 +255,7 @@ $( document ).ready(function() {
                 `<div id="memo${memoCnt}" no=${memoCnt} class="memo" style="top:${top};left:${left};z-index:${zIndex};" >
                     <div id="memo${memoCnt}header" class="header">
                         <h1 class="blind">메모장</h1>
-                        <button id="btn_close${memoCnt}" no=${memoCnt} class="btn_close" ><span class="blind">닫기</span></button>
+                        <button id="memo${memoCnt}btn_close" no=${memoCnt} class="btn_close" ><span class="blind">닫기</span></button>
                     </div>
                     <div class="content">
                         <div id="memo${memoCnt}textarea" no=${memoCnt} class="textarea" contenteditable="true" style="width:${width}; height:${height};">  
@@ -304,7 +304,7 @@ document.addEventListener('contextmenu', () => {
         `<div id="memo${memoCnt}" no=${memoCnt} class="memo" style="top:100px;left:100px;z-index:${zIndex};">
             <div id="memo${memoCnt}header" class="header">
                 <h1 class="blind">메모장</h1>
-                <button id="btn_close${memoCnt}" no=${memoCnt} class="btn_close" ><span class="blind">닫기</span></button>
+                <button id="memo${memoCnt}btn_close" no=${memoCnt} class="btn_close" ><span class="blind">닫기</span></button>
             </div>
             <div class="content">
                 <div id="memo${memoCnt}textarea" no=${memoCnt} class="textarea" contenteditable="true" style="width:200px; height:100px;">    
