@@ -121,7 +121,7 @@ const closeEvent = () => {
 // Text Input Event
 const textInputEvent = () => {
     $('.textarea').keyup(function(){
-        let zIndex = Number(localStorage.getItem("zIndex"))
+        const zIndex = Number(localStorage.getItem("zIndex"))
         const newZIndex = zIndex+1
 
         const no = $(this).attr("no");
@@ -146,13 +146,11 @@ const storageClaeEvent = () => {
 }
 
 const dragElement = (elmnt) => {
+    // 위치값 변수 선언
     let pos1 = 0, pos2 = 0, pos3 = 0, pos4 = 0;
 
-    document.getElementById(elmnt.id + "header").onmousedown   = headerDragMouseDown;
-    document.getElementById(elmnt.id + "btn_size").onmousedown = sizeDragMouseDown;
-
     // 상단 드래그시 위치 조정
-    function headerDragMouseDown(e) {
+    const headerDragMouseDown = (e) => {
         e = e || window.event;
         e.preventDefault();
 
@@ -166,7 +164,7 @@ const dragElement = (elmnt) => {
         document.onmousemove = headerElementDrag;
     }
 
-    function sizeDragMouseDown(e) {
+    const sizeDragMouseDown = (e) => {
         e = e || window.event;
         e.preventDefault();
 
@@ -180,7 +178,7 @@ const dragElement = (elmnt) => {
         document.onmousemove = sizeElementDrag;
     }
 
-    function headerElementDrag(e) {
+    const headerElementDrag = (e) => {
         e = e || window.event;
         e.preventDefault();
 
@@ -195,7 +193,7 @@ const dragElement = (elmnt) => {
         elmnt.style.left = (elmnt.offsetLeft - pos1) + "px";
     }
 
-    function sizeElementDrag(e) {
+    const sizeElementDrag = (e) =>  {
         e = e || window.event;
         e.preventDefault();
 
@@ -205,8 +203,8 @@ const dragElement = (elmnt) => {
         document.getElementById(elmnt.id + "textarea").style.height = 100 + ((e.clientY - elmnt.offsetTop)  - (pos4 - elmnt.offsetTop)) + "px";
     }
 
-    function closeDragElement() {
-        let zIndex = Number(localStorage.getItem("zIndex"))
+    const closeDragElement = () => {
+        const zIndex = Number(localStorage.getItem("zIndex"))
         const newZIndex = zIndex+1
 
         elmnt.style["z-index"] = newZIndex;
@@ -226,9 +224,13 @@ const dragElement = (elmnt) => {
         document.onmouseup   = null;
         document.onmousemove = null;
     }
+
+    // Evnet 바인딩 처리
+    document.getElementById(elmnt.id + "header").onmousedown   = headerDragMouseDown;
+    document.getElementById(elmnt.id + "btn_size").onmousedown = sizeDragMouseDown;
 }
 
-// Event 로드
+// 화면 로드시 momo 바인딩 (추가로 localStorage 클리어 하는 이벤트 바인딩)
 $( document ).ready(function() {
 
     // localStorage 클리어 이벤트
@@ -276,7 +278,7 @@ $( document ).ready(function() {
 });
 
 // 우클릭 이벤트
-document.addEventListener('contextmenu', function() {
+document.addEventListener('contextmenu', () => {
     // 브라우저 우클릭 이벤트 중지
     event.preventDefault();
 
