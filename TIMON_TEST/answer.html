@@ -108,6 +108,34 @@
 <script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
 <script>
 
+// Create memo
+// 메모 객체데이터를 받아서 memo객체 생성 후 리턴
+const createMemo = (memoData) => {
+    const memoCnt = memoData["memoCnt"];
+    const top     = memoData["top"];
+    const left    = memoData["left"];
+    const width   = memoData["width"];
+    const height  = memoData["height"];
+    const zIndex  = memoData["zIndex"];
+    const text    = memoData["text"];
+
+    const memo = 
+        `<div id="memo${memoCnt}" no=${memoCnt} class="memo" style="top:${top};left:${left};z-index:${zIndex};" >
+            <div id="memo${memoCnt}header" class="header">
+                <h1 class="blind">메모장</h1>
+                <button id="memo${memoCnt}btn_close" no=${memoCnt} class="btn_close" ><span class="blind">닫기</span></button>
+            </div>
+            <div class="content">
+                <div id="memo${memoCnt}textarea" no=${memoCnt} class="textarea" contenteditable="true" style="width:${width}; height:${height};">  
+                ${text}
+                </div>
+                <button id="memo${memoCnt}btn_size" no=${memoCnt} class="btn_size"><span class="blind">메모장 크기 조절</span></button>
+            </div>
+        </div>`
+
+    return memo;
+}
+
 // Close Event
 const closeEvent = () => {
     // 메모장 종료 이벤트
@@ -117,25 +145,6 @@ const closeEvent = () => {
         const id = `memo${no}`;
         $(`#${id}`).hide();
     });    
-}
-
-// Get New Z-Index
-const getNewZIndex = () => {
-    const zIndex = Number(localStorage.getItem("zIndex"))
-    const newZIndex = zIndex+1
-    localStorage.setItem("zIndex", newZIndex);
-
-    return newZIndex;
-}
-
-// initialize Event Binding
-const initEventBinding = (memoCnt) => {
-    // 닫기 이벤트
-    closeEvent();
-    // 입력 이벤트
-    textInputEvent();
-    // 드래그 이벤트
-    dragElement($(`#memo${memoCnt}`)["0"]);
 }
 
 // Text Input Event
@@ -165,6 +174,25 @@ const storageClaeEvent = () => {
         localStorage.clear();
         window.location.reload();
     })
+}
+
+// Get New Z-Index
+const getNewZIndex = () => {
+    const zIndex = Number(localStorage.getItem("zIndex"))
+    const newZIndex = zIndex+1
+    localStorage.setItem("zIndex", newZIndex);
+
+    return newZIndex;
+}
+
+// initialize Event Binding
+const initEventBinding = (memoData) => {
+    // 닫기 이벤트
+    closeEvent();
+    // 입력 이벤트
+    textInputEvent();
+    // 드래그 이벤트
+    dragElement($(`#memo${memoData["memoCnt"]}`)["0"]);
 }
 
 const dragElement = (elmnt) => {
@@ -270,32 +298,12 @@ $( document ).ready(() => {
 
             const memoData = JSON.parse(localStorage.getItem(i));
 
-            const memoCnt = memoData["memoCnt"];
-            const top     = memoData["top"];
-            const left    = memoData["left"];
-            const width   = memoData["width"];
-            const height  = memoData["height"];
-            const zIndex  = memoData["zIndex"];
-            const text    = memoData["text"];
-
-            const memo = 
-                `<div id="memo${memoCnt}" no=${memoCnt} class="memo" style="top:${top};left:${left};z-index:${zIndex};" >
-                    <div id="memo${memoCnt}header" class="header">
-                        <h1 class="blind">메모장</h1>
-                        <button id="memo${memoCnt}btn_close" no=${memoCnt} class="btn_close" ><span class="blind">닫기</span></button>
-                    </div>
-                    <div class="content">
-                        <div id="memo${memoCnt}textarea" no=${memoCnt} class="textarea" contenteditable="true" style="width:${width}; height:${height};">  
-                        ${text}
-                        </div>
-                        <button id="memo${memoCnt}btn_size" no=${memoCnt} class="btn_size"><span class="blind">메모장 크기 조절</span></button>
-                    </div>
-                </div>`
+            const memo = createMemo(memoData);
 
             $(memo).appendTo(".wrap");
 
             // memo 객체에 이벤트 바인딩
-            initEventBinding(memoCnt);
+            initEventBinding(memoData);
         }
     }
 });
@@ -323,21 +331,6 @@ document.addEventListener('contextmenu', () => {
     localStorage.setItem("memoCnt", Number(memoCnt)+1);
     localStorage.setItem("zIndex",  Number(zIndex)+1);
 
-    const memo = 
-        `<div id="memo${memoCnt}" no=${memoCnt} class="memo" style="top:100px;left:100px;z-index:${zIndex};">
-            <div id="memo${memoCnt}header" class="header">
-                <h1 class="blind">메모장</h1>
-                <button id="memo${memoCnt}btn_close" no=${memoCnt} class="btn_close" ><span class="blind">닫기</span></button>
-            </div>
-            <div class="content">
-                <div id="memo${memoCnt}textarea" no=${memoCnt} class="textarea" contenteditable="true" style="width:200px; height:100px;">    
-                </div>
-                <button id="memo${memoCnt}btn_size" no=${memoCnt} class="btn_size"><span class="blind">메모장 크기 조절</span></button>
-            </div>
-        </div>`
-
-    $(memo).appendTo(".wrap").css({"top" : event.pageY + "px", "left" : event.pageX + "px"});
-
     // 생성시 메모의 초기 데이터 생성
     const memoData = {"memoCnt" : memoCnt, 
                       "top"     : event.pageY + "px",
@@ -347,11 +340,15 @@ document.addEventListener('contextmenu', () => {
                       "zIndex"  : zIndex,
                       "text"    : ""};
 
+    const memo = createMemo(memoData);
+
+    $(memo).appendTo(".wrap").css({"top" : event.pageY + "px", "left" : event.pageX + "px"});
+
     // localStorage 메모의 데이터 저장
     localStorage.setItem(memoCnt,JSON.stringify(memoData));
 
     // memo 객체에 이벤트 바인딩
-    initEventBinding(memoCnt);
+    initEventBinding(memoData);
 });
 
 </script>
