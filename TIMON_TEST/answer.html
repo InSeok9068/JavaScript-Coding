@@ -111,6 +111,7 @@
 // Close Event
 const closeEvent = () => {
     // 메모장 종료 이벤트
+    // 객체의 this 바인딩을 위해 function() 사용
     $(".btn_close").click(function(){
         const no = $(this).attr("no");
         const id = `memo${no}`;
@@ -122,6 +123,7 @@ const closeEvent = () => {
 const textInputEvent = () => {
     // textarea 값을 입력시 그 값을 localStorae에 저장 및
     // 해당 Div객체 localStorae의 z-index 최상위값 적용
+    // 객체의 this 바인딩을 위해 function() 사용
     $('.textarea').keyup(function(){
         const zIndex = Number(localStorage.getItem("zIndex"))
         const newZIndex = zIndex+1
@@ -142,7 +144,7 @@ const textInputEvent = () => {
 // Storage Clear Event
 const storageClaeEvent = () => {
     // Clear 버튼 클릭시 localStorage 클리어 및 페이지 리로드
-    $('#btn_clear').click(function(){
+    $('#btn_clear').click(() =>{
         localStorage.clear();
         window.location.reload();
     })
@@ -241,7 +243,7 @@ const dragElement = (elmnt) => {
 }
 
 // 화면 로드시 momo 바인딩 (추가로 localStorage 클리어 하는 이벤트 바인딩)
-$( document ).ready(function() {
+$( document ).ready(() => {
 
     // localStorage 클리어 이벤트
     storageClaeEvent();
