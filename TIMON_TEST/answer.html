@@ -123,6 +123,7 @@ const textInputEvent = () => {
     $('.textarea').keyup(function(){
         let zIndex = Number(localStorage.getItem("zIndex"))
         const newZIndex = zIndex+1
+
         const no = $(this).attr("no");
         const id = `memo${no}`;
         const memoData = JSON.parse(localStorage.getItem(no));
@@ -182,14 +183,15 @@ const dragElement = (elmnt) => {
     function headerElementDrag(e) {
         e = e || window.event;
         e.preventDefault();
-        // calculate the new cursor position:
+
+        // 드래그한 위치값 계산
         pos1 = pos3 - e.clientX;
         pos2 = pos4 - e.clientY;
         pos3 = e.clientX;
         pos4 = e.clientY;
 
-        // set the element's new position:
-        elmnt.style.top = (elmnt.offsetTop - pos2) + "px";
+        // 원래 위치에 계산한 값을 빼서 최종 드랍될 위치값을 넣어줌
+        elmnt.style.top  = (elmnt.offsetTop  - pos2) + "px";
         elmnt.style.left = (elmnt.offsetLeft - pos1) + "px";
     }
 
@@ -197,6 +199,8 @@ const dragElement = (elmnt) => {
         e = e || window.event;
         e.preventDefault();
 
+        // 첫번째 클릭한 지점과 드래그 시점의 위치 값 계산하여 얼만큼 늘어난 수치를 계산
+        // textarea의 기본 width 200px와 height 100px에 계산값을 더하여줌
         document.getElementById(elmnt.id + "textarea").style.width  = 200 + ((e.clientX - elmnt.offsetLeft) - (pos3 - elmnt.offsetLeft)) + "px";
         document.getElementById(elmnt.id + "textarea").style.height = 100 + ((e.clientY - elmnt.offsetTop)  - (pos4 - elmnt.offsetTop)) + "px";
     }
@@ -232,7 +236,7 @@ $( document ).ready(function() {
     
     // localStorage 저장 되어있는 memo를 찾아서 바인딩 처리
     if(localStorage.length != 0){
-        // -2는 localStorage z-index, memoCnt 값 제외
+        // -2는 localStorage z-index, memoCnt 값 제외한 순수 memo의 수를 구하여줌
         for(let i=1; i<=localStorage.length-2; i++){
 
             const memoData = JSON.parse(localStorage.getItem(i));
@@ -273,7 +277,7 @@ $( document ).ready(function() {
 
 // 우클릭 이벤트
 document.addEventListener('contextmenu', function() {
-     // 브라우저 우클릭 이벤트 중지
+    // 브라우저 우클릭 이벤트 중지
     event.preventDefault();
 
     // localStorage 저장한 memoCnt 가져오기
