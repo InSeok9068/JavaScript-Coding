@@ -119,14 +119,22 @@ const closeEvent = () => {
     });    
 }
 
+// Get New Z-Index
+const getNewZIndex = () => {
+    const zIndex = Number(localStorage.getItem("zIndex"))
+    const newZIndex = zIndex+1
+    localStorage.setItem("zIndex", newZIndex);
+
+    return newZIndex;
+}
+
 // Text Input Event
 const textInputEvent = () => {
     // textarea 값을 입력시 그 값을 localStorae에 저장 및
     // 해당 Div객체 localStorae의 z-index 최상위값 적용
     // 객체의 this 바인딩을 위해 function() 사용
     $('.textarea').keyup(function(){
-        const zIndex = Number(localStorage.getItem("zIndex"))
-        const newZIndex = zIndex+1
+        const newZIndex = getNewZIndex();
 
         const no = $(this).attr("no");
         const id = `memo${no}`;
@@ -134,8 +142,7 @@ const textInputEvent = () => {
         memoData["text"]   = $(this).text();
         memoData["zIndex"] = newZIndex;
 
-        localStorage.setItem("zIndex", newZIndex);
-        localStorage.setItem(no,       JSON.stringify(memoData));
+        localStorage.setItem(no, JSON.stringify(memoData));
 
         $(`#${id}`).css("z-index", newZIndex);
     });
@@ -216,8 +223,7 @@ const dragElement = (elmnt) => {
     const closeDragElement = () => {
         // 드랍 시점에서 top, left, width, height localStorae에 저장 및
         // localStorae의 z-index 최상위값 적용
-        const zIndex = Number(localStorage.getItem("zIndex"))
-        const newZIndex = zIndex+1
+        const newZIndex = getNewZIndex();
 
         elmnt.style["z-index"] = newZIndex;
 
@@ -230,8 +236,7 @@ const dragElement = (elmnt) => {
         memoData["width"]  = document.getElementById(elmnt.id + "textarea").style.width;
         memoData["height"] = document.getElementById(elmnt.id + "textarea").style.height;
 
-        localStorage.setItem("zIndex",  newZIndex);
-        localStorage.setItem(no,        JSON.stringify(memoData));
+        localStorage.setItem(no, JSON.stringify(memoData));
 
         document.onmouseup   = null;
         document.onmousemove = null;
