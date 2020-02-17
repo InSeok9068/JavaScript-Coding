@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>Memo</title>
+    <style>
+        html, body, div, span,
+        h1, h2, h3, h4, h5, h6, p,
+        a, em, img, strong,
+        dl, dt, dd, ol, ul, li{
+            margin: 0;
+            padding: 0;
+            border: 0;
+            font-size: 12px;
+        }
+        html,body{
+            height: 100%;
+        }
+        ol, ul {
+            list-style: none;
+        }
+        blockquote, q {
+            quotes: none;
+        }
+        blockquote:before, blockquote:after,
+        q:before, q:after {
+            content: '';
+            content: none;
+        }
+        .blind{
+            overflow: hidden;
+            position: absolute;
+            clip: rect( 0 0 0 0);
+            width: 1px;
+            height: 1px;
+            margin: -1px;
+        }
+        .wrap{
+            height: 100%;
+            background-color: #f2f2f2;
+        }
+        .wrap .header{
+            position: relative;
+            height: 15px;
+            background-color: #f9f978;
+            border-bottom: 1px solid #eee;
+            cursor:move;
+        }
+
+        .memo{
+            position: absolute;
+            background-color: lightyellow;
+            border: 1px solid #eee;
+        }
+        .content{
+            position: relative;
+            overflow-x:hidden;
+            overflow-y:auto;
+            padding: 10px;
+        }
+        .content .textarea{
+            outline: none;
+        }
+        .btn_close{
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 15px;
+            height: 15px;
+            appearance: button;
+            -webkit-appearance: button;
+            -moz-appearance: button;
+            border: 0;
+            background-color: #fff;
+            cursor: pointer;
+            outline:0;
+            text-align: center;
+        }
+        .btn_close:after{
+            position: absolute;
+            top: -1px;
+            right: 0;
+            width: 15px;
+            content:"\d7";
+            font-size: 15px;
+            line-height: 15px;
+            color: #666;
+            text-align: center;
+        }
+        .btn_size{
+            position: absolute;
+            bottom: 0;
+            right: 0;
+            width: 15px;
+            height: 15px;
+            appearance: button;
+            -webkit-appearance: button;
+            -moz-appearance: button;
+            border: 0;
+            background: transparent;
+            cursor: nwse-resize;
+            outline:0;
+            text-align: center;
+        }
+    </style>
+</head>
+
+<script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
+<script>
+
+// Create memo
+// 메모 객체데이터를 받아서 memo객체 생성 후 리턴
+const createMemo = (memoData) => {
+    const memoCnt = memoData["memoCnt"];
+    const top     = memoData["top"];
+    const left    = memoData["left"];
+    const width   = memoData["width"];
+    const height  = memoData["height"];
+    const zIndex  = memoData["zIndex"];
+    const text    = memoData["text"];
+
+    const memo = 
+        `<div id="memo${memoCnt}" no=${memoCnt} class="memo" style="top:${top};left:${left};z-index:${zIndex};" >
+            <div id="memo${memoCnt}header" class="header">
+                <h1 class="blind">메모장</h1>
+                <button id="memo${memoCnt}btn_close" no=${memoCnt} class="btn_close" ><span class="blind">닫기</span></button>
+            </div>
+            <div class="content">
+                <div id="memo${memoCnt}textarea" no=${memoCnt} class="textarea" contenteditable="true" style="width:${width}; height:${height};">  
+                ${text}
+                </div>
+                <button id="memo${memoCnt}btn_size" no=${memoCnt} class="btn_size"><span class="blind">메모장 크기 조절</span></button>
+            </div>
+        </div>`
+
+    return memo;
+}
+
+// Close Event
+const closeEvent = () => {
+    // 메모장 종료 이벤트
+    // 객체의 this 바인딩을 위해 function() 사용
+    $(".btn_close").click(function(){
+        const no = $(this).attr("no");
+        const id = `memo${no}`;
+        $(`#${id}`).hide();
+    });    
+}
+
+// Text Input Event
+const textInputEvent = () => {
+    // textarea 값을 입력시 그 값을 localStorae에 저장 및
+    // 해당 Div객체 localStorae의 z-index 최상위값 적용
+    // 객체의 this 바인딩을 위해 function() 사용
+    $('.textarea').keyup(function(){
+        const newZIndex = getNewZIndex();
+
+        const no = $(this).attr("no");
+        const id = `memo${no}`;
+        const memoData = JSON.parse(localStorage.getItem(no));
+        memoData["text"]   = $(this).text();
+        memoData["zIndex"] = newZIndex;
+
+        localStorage.setItem(no, JSON.stringify(memoData));
+
+        $(`#${id}`).css("z-index", newZIndex);
+    });
+}
+
+// Storage Clear Event
+const storageClaeEvent = () => {
+    // Clear 버튼 클릭시 localStorage 클리어 및 페이지 리로드
+    $('#btn_clear').click(() =>{
+        localStorage.clear();
+        window.location.reload();
+    })
+}
+
+// Get New Z-Index
+const getNewZIndex = () => {
+    const zIndex = Number(localStorage.getItem("zIndex"))
+    const newZIndex = zIndex+1
+    localStorage.setItem("zIndex", newZIndex);
+
+    return newZIndex;
+}
+
+// initialize Event Binding
+const initEventBinding = (memoData) => {
+    // 닫기 이벤트
+    closeEvent();
+    // 입력 이벤트
+    textInputEvent();
+    // 드래그 이벤트
+    dragElement($(`#memo${memoData["memoCnt"]}`)["0"]);
+}
+
+const dragElement = (elmnt) => {
+    // 위치값 변수 선언
+    let pos1 = 0, pos2 = 0, pos3 = 0, pos4 = 0, width = 0, height = 0;
+
+    // 상단 드래그시 위치 조정
+    const headerDragMouseDown = (e) => {
+        e = e || window.event;
+        e.preventDefault();
+
+        // 첫 마우스 커서 위치값 저장
+        pos3 = e.clientX;
+        pos4 = e.clientY;
+
+        // 마우스 드래그 종료시 Event 설정
+        document.onmouseup  = closeDragElement;
+        // 마우스 드래그 Event 설정
+        document.onmousemove = headerElementDrag;
+    }
+
+    const sizeDragMouseDown = (e) => {
+        e = e || window.event;
+        e.preventDefault();
+
+        // 첫 마우스 커서 위치값 저장
+        pos3 = e.clientX;
+        pos4 = e.clientY;
+
+        // 첫 마우스 커서 시 해당 textarea의 값 저장
+        width  = Number(document.getElementById(elmnt.id + "textarea").style.width.replace('px', '')); 
+        height = Number(document.getElementById(elmnt.id + "textarea").style.height.replace('px', '')); 
+
+        // 마우스 드래그 종료시 Event 설정
+        document.onmouseup  = closeDragElement;
+        // 마우스 드래그 Event 설정
+        document.onmousemove = sizeElementDrag;
+    }
+
+    const headerElementDrag = (e) => {
+        e = e || window.event;
+        e.preventDefault();
+
+        // 드래그한 위치값 계산
+        pos1 = pos3 - e.clientX;
+        pos2 = pos4 - e.clientY;
+        pos3 = e.clientX;
+        pos4 = e.clientY;
+
+        // 원래 위치에 계산한 값을 빼서 최종 드랍될 위치값을 넣어줌
+        elmnt.style.top  = (elmnt.offsetTop  - pos2) + "px";
+        elmnt.style.left = (elmnt.offsetLeft - pos1) + "px";
+    }
+
+    const sizeElementDrag = (e) =>  {
+        e = e || window.event;
+        e.preventDefault();
+
+        // 첫번째 클릭한 지점과 드래그 시점의 위치 값 계산하여 얼만큼 늘어난 수치를 계산
+        // textarea의 현재 width 와 height 값에 계산값을 더하여줌
+        document.getElementById(elmnt.id + "textarea").style.width  = width +  ((e.clientX - elmnt.offsetLeft) - (pos3 - elmnt.offsetLeft)) + "px";
+        document.getElementById(elmnt.id + "textarea").style.height = height + ((e.clientY - elmnt.offsetTop)  - (pos4 - elmnt.offsetTop)) + "px";
+
+    }
+
+    const closeDragElement = () => {
+        // 드랍 시점에서 top, left, width, height localStorae에 저장 및
+        // localStorae의 z-index 최상위값 적용
+        const newZIndex = getNewZIndex();
+
+        elmnt.style["z-index"] = newZIndex;
+
+        const no           = elmnt.getAttribute("no")
+        const memoData     = JSON.parse(localStorage.getItem(no));
+
+        memoData["top"]    = elmnt.style.top;
+        memoData["left"]   = elmnt.style.left;
+        memoData["zIndex"] = newZIndex;
+        memoData["width"]  = document.getElementById(elmnt.id + "textarea").style.width;
+        memoData["height"] = document.getElementById(elmnt.id + "textarea").style.height;
+
+        localStorage.setItem(no, JSON.stringify(memoData));
+
+        document.onmouseup   = null;
+        document.onmousemove = null;
+    }
+
+    // Evnet 바인딩 처리
+    document.getElementById(elmnt.id + "header").onmousedown   = headerDragMouseDown;
+    document.getElementById(elmnt.id + "btn_size").onmousedown = sizeDragMouseDown;
+}
+
+// 화면 로드시 momo 바인딩 (추가로 localStorage 클리어 하는 이벤트 바인딩)
+$( document ).ready(() => {
+
+    // localStorage 클리어 이벤트
+    storageClaeEvent();
+    
+    // localStorage 저장 되어있는 memo를 찾아서 바인딩 처리
+    if(localStorage.length != 0){
+        // -2는 localStorage z-index, memoCnt 값 제외한 순수 memo의 수를 구하여줌
+        for(let i=1; i<=localStorage.length-2; i++){
+
+            const memoData = JSON.parse(localStorage.getItem(i));
+
+            const memo = createMemo(memoData);
+
+            $(memo).appendTo(".wrap");
+
+            // memo 객체에 이벤트 바인딩
+            initEventBinding(memoData);
+        }
+    }
+});
+
+// 우클릭 이벤트
+document.addEventListener('contextmenu', () => {
+    // 브라우저 우클릭 이벤트 중지
+    event.preventDefault();
+
+    // localStorage 저장한 memoCnt 가져오기
+    let memoCnt = localStorage.getItem("memoCnt");
+    let zIndex  = localStorage.getItem("zIndex");
+
+    // memoCnt값이 null인경우 (초기값) 1로 설정
+    if(memoCnt == null){
+        memoCnt = 1;
+    }
+
+    // zIndex값이 null인경우 (초기값) 1로 설정
+    if(zIndex == null){
+        zIndex = 1;
+    }
+
+    // 메모장을 생성시 마다 +1
+    localStorage.setItem("memoCnt", Number(memoCnt)+1);
+    localStorage.setItem("zIndex",  Number(zIndex)+1);
+
+    // 생성시 메모의 초기 데이터 생성
+    const memoData = {"memoCnt" : memoCnt, 
+                      "top"     : event.pageY + "px",
+                      "left"    : event.pageX + "px",
+                      "width"   : "200px",
+                      "height"  : "100px",
+                      "zIndex"  : zIndex,
+                      "text"    : ""};
+
+    const memo = createMemo(memoData);
+
+    $(memo).appendTo(".wrap").css({"top" : event.pageY + "px", "left" : event.pageX + "px"});
+
+    // localStorage 메모의 데이터 저장
+    localStorage.setItem(memoCnt,JSON.stringify(memoData));
+
+    // memo 객체에 이벤트 바인딩
+    initEventBinding(memoData);
+});
+
+</script>
+<body>
+    <div class="wrap">
+        <button id="btn_clear">로컬 스토리지 클리어</button>
+    </div>
+</body>
+</html>
